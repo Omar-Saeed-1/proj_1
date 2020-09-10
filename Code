@@ -1,0 +1,49 @@
+getwd()
+data <- read.csv("C:/Users/saeed/Desktop/hti/programnig/R/ass.7/activity.csv")
+head(data)
+Steps.By.Day<-aggregate(steps ~ date, data, sum)
+hist(Steps.By.Day$steps, main = "Total Steps By Day", col="red",xlab="Number of Steps")
+Mean<- mean(Steps.By.Day$steps, rm.na=T)
+Mean
+Meadian<- median(Steps.By.Day$steps, rm.na=T)
+Meadian
+Steps.By.Interval <- aggregate(steps~ interval, data, mean)
+plot(Steps.By.Interval$interval,Steps.By.Interval$steps, type="s",
+col="blue", xlab="Interval", ylab="Number of Steps",main="Average Number of Steps per Day by Interval")
+Max.Interval <- Steps.By.Interval[which.max(Steps.By.Interval$steps),1]
+Max.Interval
+NA.Total <- sum(!complete.cases(data))
+NA.Total
+Steps.Average <- aggregate(steps ~ interval, data = data, FUN = mean)
+fill.NA <- numeric()
+for (i in 1:nrow(data)) {obs <- data[i, ]
+    if (is.na(obs$steps)) {
+         steps <- subset(Steps.Average, interval == obs$interval)$steps
+     } else {
+         steps <- obs$steps
+     }
+     fill.NA <- c(fill.NA, steps)
+}
+N.activity <- data
+N.activity$steps <- fill.NA
+N.activity <- data
+N.activity$steps <- fill.NA
+Steps.Total.Union <- aggregate(steps ~ date, data = N.activity, sum, na.rm = TRUE)
+hist(Steps.Total.Union$steps, main = "Total Steps Each Day", col="green", xlab="Number of Steps")
+#Create Histogram to show difference. 
+hist(Steps.By.Day$steps, main = paste("Total Steps Each Day"), col="red", xlab="Number of Steps", add=T)
+legend("topright", c("Imputed", "Non-imputed"), col=c("green", "red"), lwd=5)
+Total.Mean <- mean(Steps.Total.Union$steps)
+Total.Mean
+Total.Median <- median(Steps.Total.Union$steps)
+Total.Median
+Mean.Diffrent <- Total.Mean - Mean
+Mean.Diffrent
+Median.Diffrent <- Total.Median - Meadian
+Median.Diffrent
+weekdays <- c("Monday", "Tuesday", "Wednesday", "Thursday","Friday")
+N.activity$dow = as.factor(ifelse(is.element(weekdays(as.Date(N.activity$date)),
+weekdays), "Weekday", "Weekend"))
+Steps.Total.Union <- aggregate(steps ~ interval + dow, N.activity, mean)
+library(lattice)
+xyplot(Steps.Total.Union$steps ~ Steps.Total.Union$interval|Steps.Total.Union$dow, main="Average Steps per Day by Interval",xlab="Interval", ylab="Steps",layout=c(1,2), type="s",col="pink3")
